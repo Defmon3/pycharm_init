@@ -1,0 +1,16 @@
+
+# Ignore PyCharm project files
+.idea/
+
+# Ignore cache and virtual environment directories
+__pycache__/
+_venv/
+venv/
+.env
+# Ignore log, test, and session files
+*.log
+
+
+# Ignore compiled Python files
+*.pyc
+
