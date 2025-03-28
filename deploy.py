@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+"""
+SPDX-License-Identifier: LicenseRef-NonCommercial-Only
+© 2025 github.com/defmon3 — Non-commercial use only. Commercial use requires permission.
+
+Dependencies:
+uv add
+"""
 import os
 import subprocess
 from typing import NoReturn
