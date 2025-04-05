@@ -51,6 +51,7 @@ def run_cmd(args: list[str], check: bool = True):
 def get_content_root() -> Path:
     content_root = Path(__file__).resolve().parent
     log.info(f"Determined content root (relative to script): {content_root}")
+    log.debug(f"Determined content root: {content_root}") # DEBUG
     return content_root
 
 

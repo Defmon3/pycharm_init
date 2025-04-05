@@ -75,16 +75,12 @@ def find_setup_script(extract_dir: Path, script_name: str) -> Path | None:
         log.info(  f"Found script at: {direct_path}")
         return direct_path
 
-    # Look inside the first subdirectory found (often 'repo-main')
-    subdirs = [d for d in extract_dir.iterdir() if d.is_dir()]
-    if len(subdirs) >= 1:
+    if subdirs := [d for d in extract_dir.iterdir() if d.is_dir()]:
         # Check inside the first subdir found
         subdir_path = subdirs[0] / script_name
         if subdir_path.is_file():
             log.info(  f"Found script at: {subdir_path}")
             return subdir_path
-        # Optional: check other subdirs if structure varies?
-
     log.debug("ERROR", f"Could not find '{script_name}' in extracted content.")
     return None
 
@@ -112,32 +108,32 @@ def main_fetch_and_run():
 
     try:
         with temporary_directory_context() as temp_dir:
-            zip_file_path = temp_dir / "template.zip"
-            extract_dir_path = temp_dir / "extracted"
-            extract_dir_path.mkdir()
-
-            # 1. Download
-            download_zip_stdlib(TEMPLATE_ZIP_URL, zip_file_path)
-
-            # 2. Extract
-            extract_zip_stdlib(zip_file_path, extract_dir_path)
-
-            setup_script_path = find_setup_script(extract_dir_path, SETUP_SCRIPT_NAME)
-            if setup_script_path is None:
-                raise RuntimeError("Setup script could not be located in the extracted archive.")
-
-
-            cmd_to_run = ["uv", "run", str(setup_script_path)] + passed_args
-            run_uv_command(cmd_to_run) # This will handle dependencies via header
-
+            extract_run(temp_dir, passed_args)
         log.info(  "--- Fetch and Run Bootstrapper Finished Successfully ---")
         sys.exit(0)
 
     except Exception as e:
         log.debug("CRITICAL", f"!!! Bootstrapper failed: {e}")
-        # Optionally print traceback for debugging
-        # print(traceback.format_exc(), file=sys.stderr)
+
         sys.exit(1)
+
+
+def extract_run(temp_dir, passed_args):
+    zip_file_path = temp_dir / "template.zip"
+    extract_dir_path = temp_dir / "extracted"
+    extract_dir_path.mkdir()
+
+    download_zip_stdlib(TEMPLATE_ZIP_URL, zip_file_path)
+
+    # 2. Extract
+    extract_zip_stdlib(zip_file_path, extract_dir_path)
+
+    setup_script_path = find_setup_script(extract_dir_path, SETUP_SCRIPT_NAME)
+    if setup_script_path is None:
+        raise RuntimeError("Setup script could not be located in the extracted archive.")
+
+    cmd_to_run = ["uv", "run", str(setup_script_path)] + passed_args
+    run_uv_command(cmd_to_run) # This will handle dependencies via header
 
 
 if __name__ == "__main__":
