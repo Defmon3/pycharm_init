@@ -2,8 +2,6 @@
 """
 SPDX-License-Identifier: LicenseRef-NonCommercial-Only
 © 2025 github.com/defmon3 — Non-commercial use only. Commercial use requires permission.
-SPDX-License-Identifier: LicenseRef-NonCommercial-Only
-© 2025 github.com/defmon3 — Non-commercial use only. Commercial use requires permission.
 
 Dependencies:
 """
