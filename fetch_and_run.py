@@ -3,6 +3,7 @@
 # requires-python = ">=3.8"
 # dependencies = [
 #    "loguru"
+#    "jinja2",
 # ]
 # ///
 """
@@ -121,13 +122,11 @@ def main_fetch_and_run():
             # 2. Extract
             extract_zip_stdlib(zip_file_path, extract_dir_path)
 
-            # 3. Find the real setup script
             setup_script_path = find_setup_script(extract_dir_path, SETUP_SCRIPT_NAME)
             if setup_script_path is None:
                 raise RuntimeError("Setup script could not be located in the extracted archive.")
 
-            # 4. Execute the setup script using 'uv run'
-            # Build the command, including any passed arguments (like --clean)
+
             cmd_to_run = ["uv", "run", str(setup_script_path)] + passed_args
             run_uv_command(cmd_to_run) # This will handle dependencies via header
 
