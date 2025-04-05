@@ -157,7 +157,7 @@ def load_context_from_toml(config_path: Path) -> dict:
             config_data = tomlkit.load(f)
 
         # Extract the specific section, default to empty dict if section missing
-        context = config_data.get('template_context', {})
+        context = dict(config_data)
         log.debug(f"Loaded context from TOML: {context}")
 
     except FileNotFoundError:
