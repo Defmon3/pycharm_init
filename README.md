@@ -16,53 +16,7 @@ uv venv
 uv add package1 package2 ...
 ```
 
-## Configuration
 
-Create a `config.toml` file:
-
-```toml
-main_table = "project.dataset.table"
-temp_table = "project.dataset.temp_table"
-task_file = "tasks.json"
-discord_webhook = "https://discord.com/api/webhooks/..."
-function_name = "cloud_function_name"
-region = "your-region"
-python_version = "312"
-project = "your-project-id"
-schedule = "*/15 * * * *"
-service_account_email = "your-service-account-email"
-```
-
-## Environment Variables
-
-Create a `.env` file:
-
-```
-API_TOKEN=your_token_here
-```
-
-## Task File Format
-
-Create a `tasks.json` file to define task groups and jobs.
-
-- Each top-level key is a task group name.
-- Each group must contain a `time_delta` and a list of `tasks`.
-- `time_delta` must include one of:
-  - `minutes`, `hours`, `days`, `weeks`, `months`, `years` (positive int)
-- Each `task` can contain specific instructions (e.g. location, radius).
-
-### Example `tasks.json`
-
-```json
-{
-  "Example_Group": {
-    "time_delta": {"minutes": 15},
-    "tasks": [
-      {"lat": 12.345, "long": 67.890, "radius": 800}
-    ]
-  }
-}
-```
 
 ## Cloud Deployment
 

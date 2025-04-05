@@ -27,6 +27,7 @@ TOOL_CONFIG = {
     "mypy": {"python_version": "3.12"},
     "ruff": {"target-version": "py312", "line-length": 120},
 }
+DEFAULT_CONFIG_FILENAME = "project_config.toml" # Default config file name
 
 def run_cmd(args: list[str], check: bool = True):
     cmd_str = ' '.join(args)
@@ -143,6 +144,30 @@ def install_dev():
     update_pyproject_toml_unsafe(TARGET_DIR)
     log.info("pyproject.toml update complete.")
 
+def load_context_from_toml(config_path: Path) -> dict:
+    """Loads template context variables from a TOML file."""
+    context = {}
+    if not config_path.is_file():
+        log.warning(f"Configuration file not found: {config_path}. Skipping context loading from TOML.")
+        return context
+
+    log.info(f"Loading template context from: {config_path}")
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config_data = tomlkit.load(f)
+
+        # Extract the specific section, default to empty dict if section missing
+        context = config_data.get('template_context', {})
+        log.debug(f"Loaded context from TOML: {context}")
+
+    except FileNotFoundError:
+        log.warning(f"Configuration file not found during read attempt: {config_path}")
+    except tomlkit.exceptions.ParseError as e:
+        log.error(f"Error parsing TOML file {config_path}: {e}")
+    except Exception as e:
+        log.error(f"An unexpected error occurred loading {config_path}: {e}", exception=True)
+
+    return context
 
 def run():
     try:
@@ -150,7 +175,7 @@ def run():
         project_name = TARGET_DIR.name
         log.info(f"--- Starting Project File Processing for '{project_name}' ---")
         content_root = get_content_root()
-        render_context = {'NAME': project_name}
+        render_context = load_context_from_toml(Path(DEFAULT_CONFIG_FILENAME))
         process_extracted_files(content_root, TARGET_DIR, render_context)
         remove_live_template(TARGET_DIR)
         log.success(f"--- Project Initialization Logic for '{project_name}' Finished Successfully ---")
