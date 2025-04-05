@@ -67,11 +67,11 @@ def extract_zip_stdlib(zip_path: Path, extract_dir: Path):
 
 def find_setup_script(extract_dir: Path, script_name: str) -> Path | None:
     """Finds the setup script within the extracted directory structure."""
-    log.debug("INFO", f"Searching for '{script_name}' within '{extract_dir}'...")
+    log.info(  f"Searching for '{script_name}' within '{extract_dir}'...")
     # Check common patterns: directly inside, or inside one subdirectory
     direct_path = extract_dir / script_name
     if direct_path.is_file():
-        log.debug("INFO", f"Found script at: {direct_path}")
+        log.info(  f"Found script at: {direct_path}")
         return direct_path
 
     # Look inside the first subdirectory found (often 'repo-main')
@@ -80,7 +80,7 @@ def find_setup_script(extract_dir: Path, script_name: str) -> Path | None:
         # Check inside the first subdir found
         subdir_path = subdirs[0] / script_name
         if subdir_path.is_file():
-            log.debug("INFO", f"Found script at: {subdir_path}")
+            log.info(  f"Found script at: {subdir_path}")
             return subdir_path
         # Optional: check other subdirs if structure varies?
 
@@ -89,24 +89,24 @@ def find_setup_script(extract_dir: Path, script_name: str) -> Path | None:
 
 def run_uv_command(cmd: list[str]):
     """Runs a command, typically 'uv run ...'."""
-    log.debug("INFO", f"Executing: {' '.join(cmd)}")
+    log.debug(f"Executing: {' '.join(cmd)}")
     try:
         # Run and let output stream to terminal, check for errors
         subprocess.run(cmd, check=True)
-        log.debug("INFO", "Command executed successfully.")
+        log.debug("Command executed successfully.")
     except subprocess.CalledProcessError as e:
-        log.debug("ERROR", f"Command failed with return code {e.returncode}")
+        log.error(f"Command failed with return code {e.returncode}")
         raise # Re-raise to signal failure
     except FileNotFoundError:
-         log.debug("CRITICAL", f"Command '{cmd[0]}' not found. Is 'uv' installed and in PATH?")
+         log.critical( f"Command '{cmd[0]}' not found. Is 'uv' installed and in PATH?")
          raise
     except Exception as e:
-        log.debug("ERROR", f"Unexpected error running command: {e}")
+        log.error(f"Unexpected error running command: {e}")
         raise
 
 
 def main_fetch_and_run():
-    log.debug("INFO", "--- Fetch and Run Bootstrapper Starting ---")
+    log.info(  "--- Fetch and Run Bootstrapper Starting ---")
     passed_args = sys.argv[1:] # Get args passed to this script (like --clean)
 
     try:
@@ -128,10 +128,10 @@ def main_fetch_and_run():
 
             # 4. Execute the setup script using 'uv run'
             # Build the command, including any passed arguments (like --clean)
-            cmd_to_run = ["uv", "run", "python", str(setup_script_path)] + passed_args
+            cmd_to_run = ["uv", "run", str(setup_script_path)] + passed_args
             run_uv_command(cmd_to_run) # This will handle dependencies via header
 
-        log.debug("INFO", "--- Fetch and Run Bootstrapper Finished Successfully ---")
+        log.info(  "--- Fetch and Run Bootstrapper Finished Successfully ---")
         sys.exit(0)
 
     except Exception as e:
