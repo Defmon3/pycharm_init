@@ -1,0 +1,84 @@
+name: Deploy Cloud Function
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5.5.0
+        with:
+          python-version: 3.12.9
+
+      - name: Cache uv .venv
+        uses: actions/cache@v4.2.6
+        with:
+          path: .venv
+          key: ${{ runner.os }}-uv-${{ hashFiles('**/uv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-
+
+      - name: Load .env variables
+        uses: xom9ikk/dotenv@v2.3.0
+        with:
+          path: .env
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2.1.8
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ env.PROJECT_ID }}
+          create_credentials_file: true
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Lock dependencies
+        run: uv lock
+
+      - name: Export requirements.txt
+        run: uv export --format requirements-txt --locked > app/requirements.txt
+
+      - name: Check if app/ changed
+        id: app_changes
+        run: |
+          git fetch origin ${{ github.event.before }} --depth=1 || true
+          if git diff --name-only "${{ github.event.before || 'HEAD~1' }}" ${{ github.sha }} | grep '^app/'; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deploy Cloud Function
+        if: steps.app_changes.outputs.changed == 'true'
+        run: |
+          gcloud functions deploy ${{ env.FUNCTION_NAME }} \
+            --runtime ${{ env.RUNTIME }} \
+            --trigger-http \
+            --region ${{ env.REGION }} \
+            --gen2 \
+            --source=./app \
+            --entry-point=main \
+            --no-allow-unauthenticated \
+            --set-env-vars "PROJECT_ID=${{ env.PROJECT_ID }},FUNCTION_NAME=${{ env.FUNCTION_NAME }},RUNTIME=${{ env.RUNTIME }},REGION=${{ env.REGION }},DATASET=${{ env.DATASET }},MAIN_TABLE=${{ env.MAIN_TABLE }},TEMP_TABLE=${{ env.TEMP_TABLE }}"
+
+      - name: Configure Scheduler Job
+        run: |
+          gcloud scheduler jobs describe "${{ env.FUNCTION_NAME }}-job" --location="${{ env.REGION }}" || \
+          gcloud scheduler jobs create http "${{ env.FUNCTION_NAME }}-job" \
+            --schedule="*/15 * * * *" \
+            --time-zone="Europe/Stockholm" \
+            --uri="https://${{ env.REGION }}-${{ env.PROJECT_ID }}.cloudfunctions.net/${{ env.FUNCTION_NAME }}" \
+            --http-method=GET \
+            --memory=512Mi \
+            --oidc-service-account-email="${{ env.RUNTIME_SERVICE_ACCOUNT_EMAIL }}" \
+            --location="${{ env.REGION }}"
