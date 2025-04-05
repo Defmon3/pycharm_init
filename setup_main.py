@@ -175,7 +175,7 @@ def run():
         project_name = TARGET_DIR.name
         log.info(f"--- Starting Project File Processing for '{project_name}' ---")
         content_root = get_content_root()
-        render_context = load_context_from_toml(Path(DEFAULT_CONFIG_FILENAME))
+        render_context = load_context_from_toml(content_root /  DEFAULT_CONFIG_FILENAME)
         process_extracted_files(content_root, TARGET_DIR, render_context)
         remove_live_template(TARGET_DIR)
         log.success(f"--- Project Initialization Logic for '{project_name}' Finished Successfully ---")
