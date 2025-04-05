@@ -144,8 +144,9 @@ def install_dev():
     update_pyproject_toml_unsafe(TARGET_DIR)
     log.info("pyproject.toml update complete.")
 
-def load_context_from_toml(config_path: Path) -> dict:
+def load_context_from_toml(_config_path: Path, default_config_path: Path) -> dict:
     """Loads template context variables from a TOML file."""
+    config_path = default_config_path if default_config_path.is_file() else  _config_path
     context = {}
     if not config_path.is_file():
         log.warning(f"Configuration file not found: {config_path}. Skipping context loading from TOML.")
@@ -175,7 +176,7 @@ def run():
         project_name = TARGET_DIR.name
         log.info(f"--- Starting Project File Processing for '{project_name}' ---")
         content_root = get_content_root()
-        render_context = load_context_from_toml(content_root /  DEFAULT_CONFIG_FILENAME)
+        render_context = load_context_from_toml(content_root, Path(DEFAULT_CONFIG_FILENAME))
         process_extracted_files(content_root, TARGET_DIR, render_context)
         remove_live_template(TARGET_DIR)
         log.success(f"--- Project Initialization Logic for '{project_name}' Finished Successfully ---")

@@ -1,83 +1,33 @@
-# {{ FUNCTION_NAME | default("[Function Name]") }}
+# Function: {{ FUNCTION_NAME | default("[Function Name]") }}
 
-<!-- Optional: Add badges here (e.g., build status, coverage, license) -->
-<!-- [![Build Status](https://travis-ci.org/user/repo.svg?branch=main)](https://travis-ci.org/user/repo) -->
-<!-- [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) -->
-
-A brief description of what this project does. Explain its purpose and goals. This project contains the code for the `{{ FUNCTION_NAME }}` service/functionality.
+A brief description of what this project does and its main purpose. This repository contains the code for the `{{ FUNCTION_NAME }}` service/functionality.
 
 <!--
 **Note for Maintainers:**
-This README uses Jinja2 placeholders. Ensure these are replaced during your deployment or documentation generation process:
+This README uses Jinja2 placeholders defined in the configuration (e.g., project_config.toml). Ensure these are populated correctly:
 - `{{ FUNCTION_NAME }}`: The name of the primary function or service.
 - `{{ PROJECT_ID }}`: Your Cloud Project ID (e.g., GCP project).
 - `{{ REGION }}`: The deployment region (e.g., `us-central1`).
-- `{{ RUNTIME }}`: The specific runtime environment (e.g., `python311`, `nodejs18`, `go120`).
+- `{{ RUNTIME }}`: The specific runtime environment (e.g., `python311`, `nodejs18`).
 -->
-
-## Table of Contents
-
-- [Features](#features)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage / Deployment](#usage--deployment)
-- [Testing](#testing)
-- [Contributing](#contributing)
-- [License](#license)
-
-## Features
-
-*   List the key features of your project.
-*   What problems does it solve?
-*   What makes it stand out?
 
 ## Prerequisites
 
-Before you begin, ensure you have met the following requirements:
-
-*   You have installed [Git](https://git-scm.com/).
-*   You have an account with your cloud provider (implied by `PROJECT_ID`).
-*   You have installed the necessary cloud SDK (e.g., [Google Cloud SDK](https://cloud.google.com/sdk/docs/install)).
-*   You have installed the required runtime: `{{ RUNTIME }}`.
-    *   _Example_: If `{{ RUNTIME }}` is `python311`, you need Python 3.11.
-    *   _Example_: If `{{ RUNTIME }}` is `nodejs18`, you need Node.js v18.
-*   You might need a package manager (e.g., `pip` for Python, `npm` for Node.js, `go` modules).
-*   _Add any other prerequisites specific to your project (databases, APIs, tools)._
-
-## Installation
-
-1.  **Clone the repository:**
-    ```bash
-    git clone <your-repository-url>
-    cd <repository-directory>
-    ```
-
-2.  **Install dependencies:**
-    *(Choose the relevant command for your runtime)*
-    ```bash
-    # Example for Python with requirements.txt
-    pip install -r requirements.txt
-
-    # Example for Node.js with package.json
-    npm install
-
-    # Example for Go (if using modules)
-    go mod download
-    ```
+*   **Runtime:** Requires `{{ RUNTIME }}` to be installed.
+*   **Cloud Provider Account:** Access to a cloud environment corresponding to `{{ PROJECT_ID }}`.
+*   **Cloud SDK:** The relevant Cloud SDK installed and configured (e.g., gcloud, aws cli, az cli).
+*   _(Add any other *essential* project-specific prerequisites like required APIs or tools)._
 
 ## Configuration
 
-Configure the environment variables needed for the application. This might include:
+Key configuration parameters for deployment and execution:
 
-*   `PROJECT_ID`: Set to `{{ PROJECT_ID }}`.
-*   `REGION`: Set to `{{ REGION }}`.
-*   _(Add other necessary environment variables, e.g., API keys, database URIs)_
-
-You might set these in your shell, a `.env` file (ensure it's in `.gitignore` if it contains secrets!), or through your deployment environment's configuration settings.
+*   **Project ID:** `{{ PROJECT_ID }}`
+*   **Region:** `{{ REGION }}`
+*   _(List any other critical environment variables or configuration settings needed)._
 
 ```bash
-# Example of setting environment variables in bash/zsh
+# Example environment variable setup
 export PROJECT_ID="{{ PROJECT_ID }}"
 export REGION="{{ REGION }}"
-# export OTHER_VARIABLE="value"
+# export OTHER_VAR="value"
