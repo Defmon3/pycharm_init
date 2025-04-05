@@ -36,42 +36,42 @@ def temporary_directory_context(prefix: str = "fetch_run_"):
     tmpdir_path = None
     try:
         tmpdir_path = Path(tempfile.mkdtemp(prefix=prefix)).resolve()
-        log("INFO", f"Created temporary directory: {tmpdir_path}")
+        log.debug( f"Created temporary directory: {tmpdir_path}")
         yield tmpdir_path
     finally:
         if tmpdir_path and tmpdir_path.exists():
-             log("INFO", f"Cleaning up temporary directory: {tmpdir_path}")
+             log.debug( f"Cleaning up temporary directory: {tmpdir_path}")
              try: shutil.rmtree(tmpdir_path)
-             except Exception as e_clean: log("WARNING", f"Could not remove temp dir {tmpdir_path}: {e_clean}")
+             except Exception as e_clean: log.debug("WARNING", f"Could not remove temp dir {tmpdir_path}: {e_clean}")
 
 def download_zip_stdlib(url: str, target_zip_path: Path):
     """Downloads a file using urllib."""
-    log("INFO", f"Downloading {url} to {target_zip_path}...")
+    log.debug( f"Downloading {url} to {target_zip_path}...")
     try:
         headers = {'User-Agent': 'Mozilla/5.0'} # Be polite
         req = urllib.request.Request(url, headers=headers)
         with urllib.request.urlopen(req, timeout=60) as response, open(target_zip_path, 'wb') as out_file:
             shutil.copyfileobj(response, out_file)
-        log("INFO", f"Download complete ({target_zip_path.stat().st_size} bytes).")
-    except urllib.error.URLError as e: log("ERROR", f"Download failed: {e.reason}"); raise
-    except Exception as e: log("ERROR", f"Download failed unexpectedly: {e}"); raise
+        log.debug( f"Download complete ({target_zip_path.stat().st_size} bytes).")
+    except urllib.error.URLError as e: log.debug("ERROR", f"Download failed: {e.reason}"); raise
+    except Exception as e: log.debug("ERROR", f"Download failed unexpectedly: {e}"); raise
 
 def extract_zip_stdlib(zip_path: Path, extract_dir: Path):
     """Extracts a zip file using zipfile."""
-    log("INFO", f"Extracting '{zip_path.name}' to '{extract_dir}'...")
+    log.debug(f"Extracting '{zip_path.name}' to '{extract_dir}'...")
     try:
         with zipfile.ZipFile(zip_path, 'r') as z: z.extractall(extract_dir)
-        log("INFO", "Extraction complete.")
-    except zipfile.BadZipFile: log("ERROR", "Downloaded file is not a valid zip."); raise
-    except Exception as e: log("ERROR", f"Extraction failed: {e}"); raise
+        log.debug("Extraction complete.")
+    except zipfile.BadZipFile: log.debug("ERROR", "Downloaded file is not a valid zip."); raise
+    except Exception as e: log.debug("ERROR", f"Extraction failed: {e}"); raise
 
 def find_setup_script(extract_dir: Path, script_name: str) -> Path | None:
     """Finds the setup script within the extracted directory structure."""
-    log("INFO", f"Searching for '{script_name}' within '{extract_dir}'...")
+    log.debug("INFO", f"Searching for '{script_name}' within '{extract_dir}'...")
     # Check common patterns: directly inside, or inside one subdirectory
     direct_path = extract_dir / script_name
     if direct_path.is_file():
-        log("INFO", f"Found script at: {direct_path}")
+        log.debug("INFO", f"Found script at: {direct_path}")
         return direct_path
 
     # Look inside the first subdirectory found (often 'repo-main')
@@ -80,34 +80,33 @@ def find_setup_script(extract_dir: Path, script_name: str) -> Path | None:
         # Check inside the first subdir found
         subdir_path = subdirs[0] / script_name
         if subdir_path.is_file():
-            log("INFO", f"Found script at: {subdir_path}")
+            log.debug("INFO", f"Found script at: {subdir_path}")
             return subdir_path
         # Optional: check other subdirs if structure varies?
 
-    log("ERROR", f"Could not find '{script_name}' in extracted content.")
+    log.debug("ERROR", f"Could not find '{script_name}' in extracted content.")
     return None
 
 def run_uv_command(cmd: list[str]):
     """Runs a command, typically 'uv run ...'."""
-    log("INFO", f"Executing: {' '.join(cmd)}")
+    log.debug("INFO", f"Executing: {' '.join(cmd)}")
     try:
         # Run and let output stream to terminal, check for errors
         subprocess.run(cmd, check=True)
-        log("INFO", "Command executed successfully.")
+        log.debug("INFO", "Command executed successfully.")
     except subprocess.CalledProcessError as e:
-        log("ERROR", f"Command failed with return code {e.returncode}")
-        # stderr/stdout were likely already printed by the process
+        log.debug("ERROR", f"Command failed with return code {e.returncode}")
         raise # Re-raise to signal failure
     except FileNotFoundError:
-         log("CRITICAL", f"Command '{cmd[0]}' not found. Is 'uv' installed and in PATH?")
+         log.debug("CRITICAL", f"Command '{cmd[0]}' not found. Is 'uv' installed and in PATH?")
          raise
     except Exception as e:
-        log("ERROR", f"Unexpected error running command: {e}")
+        log.debug("ERROR", f"Unexpected error running command: {e}")
         raise
 
 
 def main_fetch_and_run():
-    log("INFO", "--- Fetch and Run Bootstrapper Starting ---")
+    log.debug("INFO", "--- Fetch and Run Bootstrapper Starting ---")
     passed_args = sys.argv[1:] # Get args passed to this script (like --clean)
 
     try:
@@ -132,11 +131,11 @@ def main_fetch_and_run():
             cmd_to_run = ["uv", "run", "python", str(setup_script_path)] + passed_args
             run_uv_command(cmd_to_run) # This will handle dependencies via header
 
-        log("INFO", "--- Fetch and Run Bootstrapper Finished Successfully ---")
+        log.debug("INFO", "--- Fetch and Run Bootstrapper Finished Successfully ---")
         sys.exit(0)
 
     except Exception as e:
-        log("CRITICAL", f"!!! Bootstrapper failed: {e}")
+        log.debug("CRITICAL", f"!!! Bootstrapper failed: {e}")
         # Optionally print traceback for debugging
         # print(traceback.format_exc(), file=sys.stderr)
         sys.exit(1)
