@@ -1,4 +1,10 @@
-# fetch_and_run.py
+#!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.8"
+# dependencies = [
+#    "loguru"
+# ]
+# ///
 """
 Downloads the project template zip, extracts it, finds the main setup script
 within it, and executes that script using `uv run`. Passes --clean argument along.
@@ -14,7 +20,7 @@ import shutil
 import urllib.request
 import urllib.error
 from contextlib import contextmanager
-
+from loguru import logger as log  # type: ignore[import]
 # --- Configuration ---
 # URL of the template zip file (same as in the main setup script)
 TEMPLATE_ZIP_URL = "https://github.com/defmon3/pycharm_init/archive/refs/heads/main.zip"
@@ -22,10 +28,7 @@ TEMPLATE_ZIP_URL = "https://github.com/defmon3/pycharm_init/archive/refs/heads/m
 SETUP_SCRIPT_NAME = "setup_main.py"
 # --- End Configuration ---
 
-# --- Basic Logging ---
-def log(level, message):
-    print(f"[FETCH&RUN:{level:<7}] {message}", file=sys.stderr if level in ("ERROR", "WARNING", "CRITICAL") else sys.stdout)
-# --- End Logging ---
+
 
 @contextmanager
 def temporary_directory_context(prefix: str = "fetch_run_"):
