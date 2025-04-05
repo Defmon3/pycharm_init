@@ -1,0 +1,15 @@
+# project_config.toml
+
+[template_context]
+# Variables specifically for Jinja2 rendering
+FUNCTION_NAME = "my-configured-function"
+PROJECT_ID = "your-gcp-project-id"
+REGION = "us-east4"
+RUNTIME = "python312"
+# You can add any other variables needed by your templates here
+AUTHOR_NAME = "Your Name"
+LICENSE = "MIT"
+
+[other_settings]
+# You could have other non-template settings here if needed
+deployment_target = "cloud_run"
