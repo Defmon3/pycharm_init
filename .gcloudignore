@@ -1,0 +1,36 @@
+# .cloudignore
+
+# Byte-compiled / cache
+__pycache__/
+*.pyo
+*.pyd
+
+# Virtual environments
+env/
+venv/
+.idea/
+schemas/
+.venv/
+.coverage
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# PyInstaller
+*.spec
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+uv.lock
+pyproject.toml
+deploy.py
+DELETE.py

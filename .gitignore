@@ -1,0 +1,51 @@
+# Byte-compiled / cache
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+
+# Coverage / testing
+.coverage
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+coverage.xml
+
+# Distribution / packaging
+*.egg-info/
+.eggs/
+build/
+dist/
+pip-wheel-metadata/
+*.spec
+
+# Environment / virtualenv
+.venv/
+env/
+venv/
+
+# Editors / IDEs
+.idea/
+.vscode/
+*.code-workspace
+
+# Jupyter
+*.ipynb
+.ipynb_checkpoints/
+
+# Logs
+*.log
+
+# Lockfiles
+poetry.lock
+Pipfile.lock
+
+# Misc
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Project-specific
+schemas/

@@ -1,0 +1,33 @@
+# Function: {{ SERVICE_NAME | default("[Function Name]") }}
+
+A brief description of what this project does and its main purpose. This repository contains the code for the `{{ SERVICE_NAME }}` service/functionality.
+
+<!--
+**Note for Maintainers:**
+This README uses Jinja2 placeholders defined in the configuration (e.g., project_config.toml). Ensure these are populated correctly:
+- `{{ SERVICE_NAME }}`: The name of the primary function or service.
+- `{{ PROJECT_ID }}`: Your Cloud Project ID (e.g., GCP project).
+- `{{ REGION }}`: The deployment region (e.g., `us-central1`).
+- `{{ RUNTIME }}`: The specific runtime environment (e.g., `python311`, `nodejs18`).
+-->
+
+## Prerequisites
+
+*   **Runtime:** Requires `{{ RUNTIME }}` to be installed.
+*   **Cloud Provider Account:** Access to a cloud environment corresponding to `{{ PROJECT_ID }}`.
+*   **Cloud SDK:** The relevant Cloud SDK installed and configured (e.g., gcloud, aws cli, az cli).
+*   _(Add any other *essential* project-specific prerequisites like required APIs or tools)._
+
+## Configuration
+
+Key configuration parameters for deployment and execution:
+
+*   **Project ID:** `{{ PROJECT_ID }}`
+*   **Region:** `{{ REGION }}`
+*   _(List any other critical environment variables or configuration settings needed)._
+
+```bash
+# Example environment variable setup
+export PROJECT_ID="{{ PROJECT_ID }}"
+export REGION="{{ REGION }}"
+# export OTHER_VAR="value"
