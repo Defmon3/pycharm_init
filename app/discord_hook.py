@@ -12,6 +12,7 @@ File: discord_hook.py
 
 """
 
+
 import asyncio
 import io
 import json
@@ -24,16 +25,16 @@ from loguru import logger as log
 
 MAX_LEN = 2000
 MAX_VISIBLE_ERROR_LENGTH = 1000
-
+DISCORD_AT_MENTION = os.environ.get("DISCORD_AT_MENTION", "")
 DEFAULT_MESSAGE_FORMATS: dict[str, str] = {
     "default": "{message}",
     "debug": "🛠️ **Debug:** {message}",
     "info": "ℹ️ {message}",
     "success": "✅ {message}",
-    "fail": "❌ {message}",
+    "fail": f"❌ {DISCORD_AT_MENTION}" + " {message}",
     "warning": "⚠️ **Warning:** {message}",
-    "error": "🚨 **Error:** {message}",
-    "critical": "💥 **Critical:** {message}",
+    "error": f"🚨 {DISCORD_AT_MENTION}" + "**Error:** {message}",
+    "critical": f"💥 {DISCORD_AT_MENTION}" + " **Critical:** {message}",
     "code": "```{message}```",
 }
 
