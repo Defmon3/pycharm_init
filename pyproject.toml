@@ -3,7 +3,14 @@ name = "pycharm-init"
 version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "google-cloud-bigquery>=3.34.0",
+    "google-cloud-secret-manager>=2.24.0",
+    "google-cloud-storage>=3.1.0",
+    "loguru>=0.7.3",
+    "pendulum>=3.1.0",
+    "uvicorn>=0.34.3",
+]
 
 [dependency-groups]
 dev = [
