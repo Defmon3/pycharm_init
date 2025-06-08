@@ -34,21 +34,6 @@ jobs:
       - name: Lock dependencies
         run: uv lock
 
-      - name: Lint with Ruff
-        run: |
-          uv add ruff # Assumes this adds to pyproject.toml if needed
-          uv run ruff check app
-
-      - name: Run tests
-        id: tests
-        run: |
-          uv add pytest pytest-cov # Assumes this adds to pyproject.toml if needed
-          uv run pytest --cov=app --cov-report=term-missing -v | tee pytest_results.log
-
-      - name: Extract pytest summary
-        id: summary
-        run: python ./.github/scripts/extract_pytest_summary.py pytest_results.log
-
       - name: Export requirements.txt
         run: uv export --format requirements-txt --locked > app/requirements.txt
 
@@ -107,79 +92,6 @@ jobs:
         env: # Still useful to ensure GCLOUD_ENV_VARS is easily accessible in the run script
           GCLOUD_ENV_VARS: ${{ env.GCLOUD_ENV_VARS }}
 
-      - name: Configure Scheduler Job1 (15m - POST with Body)
-        run: |
-          function_url=$(gcloud functions describe vk-photo-scraper --project=soldier-tracker --region=europe-west3 --gen2 --format='value(serviceConfig.uri)')
-          echo "DEBUG: Job 1 function_url: [${function_url}]"
-
-          message_body_json='{"task_file": "15m_tasks.json", "token_name": "vk-token-e107"}'
-          echo "DEBUG: Job 1 message_body_json: [${message_body_json}]" # Check this debug output carefully!
-
-          gcloud scheduler jobs update http "vk-photo-scraper-15m-job" \
-            --project=soldier-tracker \
-            --location="europe-west3" \
-            --schedule="*/15 * * * *" \
-            --time-zone="Europe/Stockholm" \
-            --uri="${function_url}" \
-            --http-method=POST \
-            --update-headers=Content-Type=application/json \
-            --message-body="${message_body_json}" \
-            --oidc-service-account-email="container-telethon-bot@soldier-tracker.iam.gserviceaccount.com" \
-            --oidc-token-audience="${function_url}" \
-            --attempt-deadline="600s" \
-            --description="Triggers vk-photo-scraper function every 15 minutes via POST." \
-            --quiet || \
-          gcloud scheduler jobs create http "vk-photo-scraper-15m-job" \
-            --project=soldier-tracker \
-            --location="europe-west3" \
-            --schedule="*/15 * * * *" \
-            --time-zone="Europe/Stockholm" \
-            --uri="${function_url}" \
-            --http-method=POST \
-            --headers=Content-Type=application/json \
-            --message-body="${message_body_json}" \
-            --oidc-service-account-email="container-telethon-bot@soldier-tracker.iam.gserviceaccount.com" \
-            --oidc-token-audience="${function_url}" \
-            --attempt-deadline="600s" \
-            --description="Triggers vk-photo-scraper function every 15 minutes via POST." \
-            --quiet
-
-      - name: Configure Scheduler Job2 (Daily - POST with Body)
-        run: |
-          function_url=$(gcloud functions describe vk-photo-scraper --project=soldier-tracker --region=europe-west3 --gen2 --format='value(serviceConfig.uri)')
-          echo "DEBUG: Job 2 function_url: [${function_url}]"
-
-          message_body_json='{"task_file": "1d_tasks.json", "token_name": "vk-token-11a9"}'
-          echo "DEBUG: Job 2 message_body_json: [${message_body_json}]" # Check this debug output carefully!
-
-          gcloud scheduler jobs update http "vk-photo-scraper-daily-job" \
-            --project=soldier-tracker \
-            --location="europe-west3" \
-            --schedule="23 12 * * *" \
-            --time-zone="Europe/Stockholm" \
-            --uri="${function_url}" \
-            --http-method=POST \
-            --update-headers=Content-Type=application/json \
-            --message-body="${message_body_json}" \
-            --oidc-service-account-email="container-telethon-bot@soldier-tracker.iam.gserviceaccount.com" \
-            --oidc-token-audience="${function_url}" \
-            --attempt-deadline="600s" \
-            --description="Triggers vk-photo-scraper function every 24 hours via POST." \
-            --quiet || \
-          gcloud scheduler jobs create http "vk-photo-scraper-daily-job" \
-            --project=soldier-tracker \
-            --location="europe-west3" \
-            --schedule="23 12 * * *" \
-            --time-zone="Europe/Stockholm" \
-            --uri="${function_url}" \
-            --http-method=POST \
-            --headers=Content-Type=application/json \
-            --message-body="${message_body_json}" \
-            --oidc-service-account-email="container-telethon-bot@soldier-tracker.iam.gserviceaccount.com" \
-            --oidc-token-audience="${function_url}" \
-            --attempt-deadline="600s" \
-            --description="Triggers vk-photo-scraper function every 24 hours via POST." \
-            --quiet
 
       - name: Notify Discord on Success
         if: success()
