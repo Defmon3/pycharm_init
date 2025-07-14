@@ -83,7 +83,7 @@ def process_extracted_files(content_root: Path, destination_dir: Path, render_co
     for src_path in content_root.rglob("*"):
         if not src_path.is_file():
             continue
-        if src_path.name in [script_name, DEFAULT_CONFIG_FILENAME]:
+        if src_path.name in [script_name]:
             log.debug(f"Skipping self ({script_name})")
             continue
 

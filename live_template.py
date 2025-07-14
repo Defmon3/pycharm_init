@@ -106,7 +106,9 @@ def process_extracted_files(content_root: Path, destination_dir: Path, render_co
     files_processed = 0
     errors = 0
     for src_path in content_root.rglob("*"):
-        if not src_path.is_file(): continue
+        if not src_path.is_file():
+            log.debug(f"Skipping non-file: {src_path}")
+            continue
         relative_path = src_path.relative_to(content_root)
         try:
             process_file( src_path, relative_path, destination_dir, render_context)
