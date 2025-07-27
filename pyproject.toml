@@ -9,7 +9,12 @@ dependencies = [
     "google-cloud-storage>=3.1.0",
     "loguru>=0.7.3",
     "pendulum>=3.1.0",
+    "pydantic[email]>=2.11.7",
+    "pydantic-settings>=2.10.1",
     "uvicorn>=0.34.3",
+    "httpx>=0.28.1",
+    "google-auth>=2.40.3",
+    "python-dotenv>=1.1.1",
 ]
 
 [dependency-groups]
