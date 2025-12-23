@@ -1,31 +1,69 @@
-# .github/scripts/send_discord_notification.py (Slim)
-import sys, os, json, requests
+#!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["httpx"]
+# ///
 
-webhook_url = os.getenv("COMMIT_WEBHOOK")
-if not webhook_url:
-    print("::warning::COMMIT_WEBHOOK not set. Skipping notification.", file=sys.stderr)
-    sys.exit(0) # Don't fail build
+"""
+Send Discord webhook notification.
 
-payload_json_string = sys.argv[1]
-try:
-    payload_dict = json.loads(payload_json_string)
-except json.JSONDecodeError as e:
-    print(f"::error::Invalid JSON payload provided: {e}", file=sys.stderr)
-    sys.exit(1) # Fail if payload is broken
+Usage: python send_discord_notification.py '<json_payload>'
+Requires COMMIT_WEBHOOK environment variable.
+"""
 
-headers = {'Content-Type': 'application/json'}
-max_retries = 3
-timeout_seconds = 15
+import json
+import os
+import sys
 
-for attempt in range(max_retries):
+import httpx
+
+MAX_RETRIES = 3
+TIMEOUT_SECONDS = 15
+
+
+def send_notification(webhook_url: str, payload: dict) -> bool:
+    """Send notification to Discord webhook with retries."""
+    for attempt in range(MAX_RETRIES):
+        try:
+            response = httpx.post(
+                webhook_url,
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=TIMEOUT_SECONDS,
+            )
+            response.raise_for_status()
+            print(f"Notification sent (Status: {response.status_code}).")
+            return True
+        except httpx.HTTPStatusError as e:
+            print(f"Attempt {attempt + 1} failed: HTTP {e.response.status_code}", file=sys.stderr)
+        except httpx.RequestError as e:
+            print(f"Attempt {attempt + 1} failed: {e}", file=sys.stderr)
+
+    return False
+
+
+def main() -> None:
+    webhook_url = os.getenv("COMMIT_WEBHOOK")
+    if not webhook_url:
+        print("::warning::COMMIT_WEBHOOK not set. Skipping notification.", file=sys.stderr)
+        sys.exit(0)
+
+    if len(sys.argv) != 2:
+        print("Usage: python send_discord_notification.py '<json_payload>'", file=sys.stderr)
+        sys.exit(1)
+
     try:
-        response = requests.post(webhook_url, headers=headers, json=payload_dict, timeout=timeout_seconds)
-        response.raise_for_status()
-        print(f"Notification sent (Status: {response.status_code}).") # Minimal log
-        sys.exit(0) # Success
-    except requests.exceptions.RequestException as e:
-        print(f"Notification attempt {attempt + 1} failed: {e}", file=sys.stderr)
-        if attempt == max_retries - 1:
-            print(f"::warning::Failed to send Discord notification after {max_retries} attempts.")
-            sys.exit(0) # Don't fail build for notification failure
-        # Optional: time.sleep(1)
+        payload = json.loads(sys.argv[1])
+    except json.JSONDecodeError as e:
+        print(f"::error::Invalid JSON payload: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    if not send_notification(webhook_url, payload):
+        print(f"::warning::Failed to send notification after {MAX_RETRIES} attempts.")
+
+    # Don't fail the build for notification failures
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()
