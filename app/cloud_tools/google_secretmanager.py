@@ -34,7 +34,7 @@ def get_secret(secret_id: str, project_id: str, version: Optional[str] = "latest
     return response.payload.data.decode("UTF-8")
 
 
-def get_secret_env(secret_id: str, project_id: str, version: Optional[str] = "latest") -> dict[str, str]:
+def get_secret_env(secret_id: str, project_id: str, version: Optional[str] = "latest") -> dict[str, str | None]:
     """
     Retrieve and parse the secret as dotenv format.
 

@@ -1,34 +1,22 @@
 # .pre-commit-config.yaml
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    # Note: v0.11.4 is quite old for ruff. Consider updating rev to a recent version (e.g., v0.5.5)
-    # Check their releases page for the latest stable version.
-    rev: v0.11.4 # Or preferably a newer version like v0.5.5
+    rev: v0.8.4
     hooks:
       - id: ruff
-        args: [--fix, --exit-non-zero-on-fix] # <-- Added --fix and --exit-non-zero-on-fix
+        args: [--fix, --exit-non-zero-on-fix]
         files: ^app/
-      # If you want ruff to also handle formatting (replaces black):
-      # - id: ruff-format
-      #   files: ^app/
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    # Note: v1.15.0 is also quite old for mypy. Consider updating.
-    rev: v1.15.0 # Or preferably a newer version
+    rev: v1.14.1
     hooks:
       - id: mypy
-        # mypy cannot auto-fix
         files: ^app/
-        # Optional: Add 'additional_dependencies' if your code needs specific libraries for mypy
-        # additional_dependencies: [types-requests, ...]
 
-  - repo: https://github.com/pre-commit/mirrors-pylint
-    # Note: v3.0.0a5 is an alpha version. Consider using a stable release if available,
-    # or check pylint's own recommended pre-commit setup.
-    rev: v3.0.0a5 # Or preferably a stable version
+  - repo: https://github.com/pylint-dev/pylint
+    rev: v3.3.3
     hooks:
       - id: pylint
-        # pylint generally does not auto-fix
         name: pylint
         entry: pylint
         language: system
@@ -38,20 +26,15 @@ repos:
   - repo: local
     hooks:
       - id: pytest
-        # pytest cannot auto-fix
         name: Run tests
         entry: uv run -- pytest tests/
         language: system
         types: [python]
-        files: ^app/ # Note: This pattern means tests only run if files in app/ change. Is that intended?
-                     # Often you want tests to run if test files OR app files change.
-                     # Consider changing to: files: ^(app/|tests/)
+        files: ^(app/|tests/)
 
   - repo: https://github.com/psf/black
-    # Note: v25.1.0 is also old. Consider updating.
-    rev: 25.1.0 # Or preferably a newer version like 24.4.2
+    rev: 24.10.0
     hooks:
       - id: black
-        # black auto-fixes by default (no --check arg)
         language_version: python3.12
         files: ^app/

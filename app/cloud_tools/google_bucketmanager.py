@@ -46,7 +46,7 @@ class BucketManager:
         self.client = storage.Client()
         self.bucket = self.client.bucket(self.bucket_name)
 
-        log.debug(f"Initialized BucketManager for bucket: {self.bucket_name}'")
+        log.debug(f"Initialized BucketManager for bucket: '{self.bucket_name}'")
 
     def upload_file(self, local_file_path: str, remote_file_name: Optional[str] = None) -> None:
         """

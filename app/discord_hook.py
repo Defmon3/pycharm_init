@@ -58,8 +58,8 @@ class DiscordAttachment:
             self.buffer = io.BytesIO(attachment_bytes)
             self.prepared = True
             return True
-        except Exception as buf_err:  # pylint: disable=broad-except
-            log.exception("Failed to create file buffer for attachment. Error:" f" {buf_err}")
+        except (UnicodeEncodeError, MemoryError, OSError) as buf_err:
+            log.exception(f"Failed to create file buffer for attachment. Error: {buf_err}")
             self.prepared = False
             return False
 
@@ -92,7 +92,7 @@ def _format_discord_message(
         formatted_message = message
 
     if len(formatted_message) > MAX_LEN:
-        log.warning(f"{func_name}: Message length ({len(formatted_message)})" f" exceeds {MAX_LEN}. Truncating.")
+        log.warning(f"{func_name}: Message length ({len(formatted_message)}) exceeds {MAX_LEN}. Truncating.")
         formatted_message = f"{formatted_message[:MAX_LEN - 10]}... [CUT]"
     return formatted_message
 
@@ -122,15 +122,15 @@ async def _send_request(client: httpx.AsyncClient, webhook_url: str, request_arg
     try:
         response = await client.post(webhook_url, **request_args)
         response.raise_for_status()
-        log.debug(f"{func_name}: Discord message sent (status" f" {response.status_code}).")
+        log.debug(f"{func_name}: Discord message sent (status {response.status_code}).")
         return True
     except httpx.HTTPStatusError as e:
-        log.warning(f"HTTP error in {func_name}: Status {e.response.status_code}" f" for URL {e.request.url}. Response: {e.response.text}")
+        log.warning(f"HTTP error in {func_name}: Status {e.response.status_code} for URL {e.request.url}. Response: {e.response.text}")
     except httpx.RequestError as e:
         url_str = str(e.request.url) if e.request else "unknown URL"
-        log.error(f"Network error in {func_name} sending to {url_str}:" f" {type(e).__name__} - {e}")
-    except Exception as e:  # pylint: disable=broad-except
-        log.exception(f"Unexpected error during HTTP request in {func_name}:" f" {type(e).__name__} - {e}")
+        log.error(f"Network error in {func_name} sending to {url_str}: {type(e).__name__} - {e}")
+    except (ValueError, TypeError, KeyError) as e:
+        log.exception(f"Unexpected error during HTTP request in {func_name}: {type(e).__name__} - {e}")
     return False
 
 
@@ -179,8 +179,8 @@ async def send_discord_message(
     try:
         async with httpx.AsyncClient(timeout=timeout) as client:
             success = await _send_request(client, webhook_url, request_args)
-    except Exception as client_err:  # pylint: disable=broad-except
-        log.exception(f"Unexpected error creating/using httpx client in {func_name}:" f" {client_err}")
+    except (httpx.HTTPError, OSError, ValueError) as client_err:
+        log.exception(f"Unexpected error creating/using httpx client in {func_name}: {client_err}")
         success = False
     finally:
         if attachment:
@@ -225,10 +225,10 @@ def handle_return(url: str, message: str, error: Optional[str] = None) -> dict[s
     result_status: dict[str, Any] = {
         "status": "failed" if is_failure else "ok",
         "message": message,
-        "region": os.getenv("REGION"),
-        "service": os.getenv("K_SERVICE"),
-        "revision": os.getenv("K_REVISION"),
-        "target-function": os.getenv("FUNCTION_TARGET"),
+        "region": os.getenv("REGION", "unknown"),
+        "service": os.getenv("K_SERVICE", "unknown"),
+        "revision": os.getenv("K_REVISION", "unknown"),
+        "target-function": os.getenv("FUNCTION_TARGET", "unknown"),
         "error": (visible_error_snippet if is_failure else ""),
     }
 
@@ -243,7 +243,7 @@ def handle_return(url: str, message: str, error: Optional[str] = None) -> dict[s
         )
     except RuntimeError as re:
         log.error(f"Could not send Discord notification: asyncio error: {re}")
-    except Exception as e:  # pylint: disable=broad-except
+    except (httpx.HTTPError, OSError, ValueError) as e:
         log.exception(f"Failed to send Discord notification within handle_return: {e}")
 
     return result_status
